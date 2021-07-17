@@ -46,10 +46,6 @@
  * When the above steps are applied, the code is ready to be compiled and uploaded
  * to the Arduino Leonardo. This can be done, for example, by using the Arduino IDE.
  * 
- * Wire diagram
- * ------------
- * 
- * 
  * Credits
  * -------
  * This script is written by TheUC. However, this script is based on all the work
@@ -57,11 +53,6 @@
  * https://os.mbed.com/users/mjr/code/Pinscape_Controller_V2//file/310ac82cbbee/USBProtocol.h/
  * and
  * https://os.mbed.com/users/mjr/code/Pinscape_Controller_V2//file/310ac82cbbee/main.cpp/
- * 
- * 
- * License
- * -------
- * This software is licensed under 
  */
 
 #include "HID-Project.h"
