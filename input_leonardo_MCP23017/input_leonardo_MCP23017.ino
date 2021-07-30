@@ -1,38 +1,38 @@
 /**
- * Arduino Leonardo LEDWIZ controller
- * ==================================
- * 
- * Program an Arduino Leonardo to acts as a simple Joystick input device.
- * Up to 16 inputs can be connected by using a MCP23017.
- * 
- * License
- * -------
- * 
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
- *  
- * Future work:
- *  - Plunger
- *  - Accelerometer
- * 
- * Credits
- * -------
- * This script is written by TheUC.
- */
+   Arduino Leonardo LEDWIZ controller
+   ==================================
+
+   Program an Arduino Leonardo to acts as a simple Joystick input device.
+   Up to 16 inputs can be connected by using a MCP23017.
+
+   License
+   -------
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+   Future work:
+    - Plunger
+    - Accelerometer
+
+   Credits
+   -------
+   This script is written by TheUC.
+*/
 
 #include "Wire.h"
-#include "HID-Project.h"
+#include <Joystick.h> //https://github.com/MHeironimus/ArduinoJoystickLibrary
 
 /**
 
@@ -74,7 +74,7 @@
      SDA: I2C data
      RESET: always set to high, same voltage as VDD
      A1,A1,A2: GND --> I2C address 0x20. Refer to datasheet for other configuration options.
- */
+*/
 #define MCP23017_I2C_PORT 0x20
 
 inline void mcp23017_write(uint8_t address, uint8_t value) {
@@ -95,19 +95,13 @@ inline uint8_t mcp23017_read(uint8_t address) {
 // Create the Joystick
 Joystick_ Joystick;
 
-uint8_t rawhidData[8];
-
-
-void setup() { 
+void setup() {
   // Initialize I2C for MCP23017
   Wire.begin();
   setupButtons();
 
   // Initialize Joystick Library
   Joystick.begin(false);
-
-  Serial.begin(115200);
-  RawHID.begin(rawhidData, sizeof(rawhidData));
 }
 
 // ~~ BEGIN READ PHYSICAL BUTTONS   ~~~~~~~~~~~~~~~~~~~
@@ -125,7 +119,7 @@ void setupButtons() {
   // Configure MCP23017: simply set both banks as input, configured as pullup
   mcp23017_write(0x0C, 0xFF); // configure bank A for pullup
   mcp23017_write(0x0D, 0xFF); // configure bank B for pullup
-  
+
   mcp23017_write(0x00, 0xFF); // configure bank A as input
   mcp23017_write(0x01, 0xFF); // configure bank B as input
 }
@@ -134,7 +128,7 @@ void updateButtons() {
   buttonsA = mcp23017_read(0x12);
   buttonsB = mcp23017_read(0x13);
 
-  if(buttonsA != buttonsLastStateA) {
+  if (buttonsA != buttonsLastStateA) {
     changed = true;
     updateButton(0, 0, buttonsA, buttonsLastStateA);
     updateButton(1, 1, buttonsA, buttonsLastStateA);
@@ -145,8 +139,8 @@ void updateButtons() {
     updateButton(6, 6, buttonsA, buttonsLastStateA);
     updateButton(7, 7, buttonsA, buttonsLastStateA);
   }
-  
-  if(buttonsB != buttonsLastStateB) {
+
+  if (buttonsB != buttonsLastStateB) {
     changed = true;
     updateButton(8, 0, buttonsB, buttonsLastStateB);
     updateButton(9, 1, buttonsB, buttonsLastStateB);
@@ -162,20 +156,14 @@ void updateButtons() {
   // and update external components
   buttonsLastStateA = buttonsA;
   buttonsLastStateB = buttonsB;
-  if(changed) {
+  if (changed) {
     changed = false;
     Joystick.sendState();
-  }
-
-  int readData = RawHID.read();
-  if(readData != -1) {
-     Serial.print("RAWHID READ: ");
-     Serial.println(readData, HEX);
   }
 }
 
 inline void updateButton(uint8_t joystickButton, uint8_t index, uint8_t newValue, uint8_t oldValue) {
-  if((newValue & (1 << index)) != (oldValue & 1 << index)) {
+  if ((newValue & (1 << index)) != (oldValue & 1 << index)) {
     Joystick.setButton(joystickButton, !(newValue & (1 << index)));
   }
 }
